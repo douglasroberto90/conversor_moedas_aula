@@ -1,17 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
-
-
-Future<Map> pegarDados() async {
-  final Uri url = Uri.https("api.hgbrasil.com","/finance",{"key":"--------"});
-  // print("URI:$url");
-  final resultado = await http.get(url);
-  // print("Codigo de status:${response.statusCode}");
-  // print(resultado.body);
-  return json.decode(resultado.body);
-}
+import 'package:conversor_moedas_aula/repositories/repositorio.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,27 +9,48 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Repositorio repositorio = Repositorio();
 
-  late double dolar;
-  late double euro;
+  late double cotacaoDolar;
+  late double cotacaoEuro;
 
   TextEditingController controlerReal = TextEditingController();
   TextEditingController controlerDolar = TextEditingController();
   TextEditingController controlerEuro = TextEditingController();
 
-  void limparCampos(){
-    controlerReal.text="";
-    controlerDolar.text="";
-    controlerEuro.text="";
+  void limparCampos() {
+    controlerReal.text = "";
+    controlerDolar.text = "";
+    controlerEuro.text = "";
   }
 
-  void _realAlterado(String texto){
-    if(texto.isEmpty){
+  void _realAlterado(String texto) {
+    if (texto.isEmpty) {
       limparCampos();
     }
     double valorReal = double.parse(texto);
-    controlerDolar.text = (valorReal * dolar).toStringAsFixed(2);
-    controlerEuro.text = (valorReal * euro).toStringAsFixed(2);
+    controlerDolar.text = (valorReal * cotacaoDolar).toStringAsFixed(2);
+    controlerEuro.text = (valorReal * cotacaoEuro).toStringAsFixed(2);
+  }
+
+  void _dolarAlterado(String texto) {
+    if (texto.isEmpty) {
+      limparCampos();
+    }
+    double valorDolar = double.parse(texto);
+    controlerReal.text = (valorDolar / cotacaoDolar).toStringAsFixed(2);
+    controlerEuro.text =
+        ((valorDolar / cotacaoDolar) * cotacaoEuro).toStringAsFixed(2);
+  }
+
+  void _euroAlterado(String texto) {
+    if (texto.isEmpty) {
+      limparCampos();
+    }
+    double valorEuro = double.parse(texto);
+    controlerReal.text = (valorEuro / cotacaoEuro).toStringAsFixed(2);
+    controlerDolar.text =
+        ((valorEuro / cotacaoEuro) * cotacaoDolar).toStringAsFixed(2);
   }
 
   @override
@@ -49,85 +58,92 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "\$ Coversor \$",
-          style: TextStyle(
-              color: Colors.white),
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: Colors.orange,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Icon(
-              Icons.monetization_on,
-              size: 150.0,
-              color: Colors.orange,
-            ),
-            FutureBuilder(
-                future: pegarDados(),
-                builder: (context, snapshot){
-                  switch(snapshot.connectionState){
-                    case ConnectionState.none:
-                    case ConnectionState.waiting:
-                      return Center(
-                        child:Text("Aguardando dados...",
-                          style: TextStyle(fontSize: 20.0,
-                              color: Colors.orange),)
-                      );
-                    default:
-                      if(snapshot.hasError){
-                        return Center(
-                            child:Text("Erro na conexão...")
-                        );
-                      }
-                      else{
-                        dolar = snapshot.data?["results"]["currencies"]["USD"]["buy"];
-                        euro = snapshot.data?["results"]["currencies"]["EUR"]["buy"];
-                        return
-                          SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                TextField(
-                                  controller: controlerReal,
-                                  decoration: InputDecoration(
-                                    label: Text("Real"),
-                                  ),
-                                style: TextStyle(
-                                  color: Colors.orange, fontSize: 20.0),
-                                keyboardType: TextInputType.numberWithOptions(decimal: true),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(
+                Icons.monetization_on,
+                size: 150.0,
+                color: Colors.orange,
+              ),
+              FutureBuilder(
+                  future: repositorio.pegarDados(),
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                      case ConnectionState.waiting:
+                        return const Center(
+                            child: Text(
+                          "Aguardando dados...",
+                          style: TextStyle(fontSize: 20.0, color: Colors.orange),
+                        ));
+                      default:
+                        if (snapshot.hasError) {
+                          return Center(child: Text("Erro na conexão..."));
+                        } else {
+                          cotacaoDolar = snapshot.data?["results"]["currencies"]
+                              ["USD"]["buy"];
+                          cotacaoEuro = snapshot.data?["results"]["currencies"]
+                              ["EUR"]["buy"];
+                          return SingleChildScrollView(
+                              child: Column(
+                            children: [
+                              TextField(
+                                controller: controlerReal,
+                                decoration: const InputDecoration(
+                                  label: Text("Real"),
+                                  prefix: Text("R\$ ",
+                                      style: TextStyle(color: Colors.orange)),
+                                ),
+                                style: const TextStyle(
+                                    color: Colors.orange, fontSize: 20.0),
+                                keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true),
                                 onChanged: _realAlterado,
-                                ),
-                                TextField(
-                                  controller: controlerDolar,
-                                  decoration: InputDecoration(
+                              ),
+                              TextField(
+                                controller: controlerDolar,
+                                decoration: const InputDecoration(
                                     label: Text("Dolar"),
-                                  ),
-                                  style: TextStyle(
-                                      color: Colors.orange, fontSize: 20.0),
-                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                ),
-                                TextField(
-                                  controller: controlerEuro,
-                                  decoration: InputDecoration(
+                                    prefix: Text("US\$ ",
+                                        style: TextStyle(color: Colors.orange))),
+                                style: const TextStyle(
+                                    color: Colors.orange, fontSize: 20.0),
+                                keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true),
+                                onChanged: _dolarAlterado,
+                              ),
+                              TextField(
+                                controller: controlerEuro,
+                                decoration: const InputDecoration(
                                     label: Text("Euro"),
-                                  ),
-                                  style: TextStyle(
-                                      color: Colors.orange, fontSize: 20.0),
-                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                )
-                              ],
-                            )
-                          );
+                                    prefix: Text(
+                                      "€ ",
+                                      style: TextStyle(color: Colors.orange),
+                                    )),
+                                style: const TextStyle(
+                                    color: Colors.orange, fontSize: 20.0),
+                                keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true),
+                                onChanged: _euroAlterado,
+                              )
+                            ],
+                          ));
                         }
-
-                      }
-                  }
-
-            )
-          ],
+                    }
+                  })
+            ],
+          ),
         ),
       ),
     );
