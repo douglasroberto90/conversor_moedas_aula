@@ -1,6 +1,9 @@
 # conversor_moedas_aula
 
-A new Flutter project.
+Projeto em Flutter demonstrando o uso de APIs. Este projeto é o primeiro contato dos alunos com APIs nestea disciplina.
+Nesse projeto é utilizada a API do HG Brasil da Bolsa B3 para trazer valores atualizados da cotação do Dólar e Euro. 
+Como este projeto é o primeiro contato com APIs em Flutter, a chave da api esta "hardcoded" e deve ser colocado na classe Repositório substituindo os ------------- de {"key":"--------"} no método Future<Map> pegarDados() async.
+Para obter uma chave válida o aluno deve se cadastrar em https://hgbrasil.com/.
 
 ## Getting Started
 
