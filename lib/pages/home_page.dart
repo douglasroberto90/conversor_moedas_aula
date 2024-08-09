@@ -29,8 +29,8 @@ class _HomePageState extends State<HomePage> {
       limparCampos();
     }
     double valorReal = double.parse(texto);
-    controlerDolar.text = (valorReal * cotacaoDolar).toStringAsFixed(2);
-    controlerEuro.text = (valorReal * cotacaoEuro).toStringAsFixed(2);
+    controlerDolar.text = (valorReal / cotacaoDolar).toStringAsFixed(2);
+    controlerEuro.text = (valorReal / cotacaoEuro).toStringAsFixed(2);
   }
 
   void _dolarAlterado(String texto) {
@@ -38,9 +38,9 @@ class _HomePageState extends State<HomePage> {
       limparCampos();
     }
     double valorDolar = double.parse(texto);
-    controlerReal.text = (valorDolar / cotacaoDolar).toStringAsFixed(2);
+    controlerReal.text = (valorDolar * cotacaoDolar).toStringAsFixed(2);
     controlerEuro.text =
-        ((valorDolar / cotacaoDolar) * cotacaoEuro).toStringAsFixed(2);
+        ((valorDolar * cotacaoDolar) / cotacaoEuro).toStringAsFixed(2);
   }
 
   void _euroAlterado(String texto) {
@@ -48,9 +48,9 @@ class _HomePageState extends State<HomePage> {
       limparCampos();
     }
     double valorEuro = double.parse(texto);
-    controlerReal.text = (valorEuro / cotacaoEuro).toStringAsFixed(2);
+    controlerReal.text = ((valorEuro * cotacaoEuro)).toStringAsFixed(2);
     controlerDolar.text =
-        ((valorEuro / cotacaoEuro) * cotacaoDolar).toStringAsFixed(2);
+        ((valorEuro * cotacaoEuro) / cotacaoDolar).toStringAsFixed(2);
   }
 
   @override
